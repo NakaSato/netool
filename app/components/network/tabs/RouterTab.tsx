@@ -8,11 +8,11 @@ interface RouterTabProps {
 
 const RouterTab: React.FC<RouterTabProps> = ({ ip, netmask }) => {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-3">
-      <h5 className="text-sm font-semibold mb-3 text-blue-300 flex items-center">
+    <div className="bg-gray-800 rounded-lg border border-gray-700 p-2 sm:p-3 transition-all hover:border-gray-600">
+      <h5 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-blue-300 flex items-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4 mr-1"
+          className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -25,31 +25,31 @@ const RouterTab: React.FC<RouterTabProps> = ({ ip, netmask }) => {
         Router Configuration Examples
       </h5>
 
-      <div className="text-xs space-y-4">
+      <div className="text-[10px] xs:text-xs space-y-3 sm:space-y-4">
         <div>
           <p className="mb-1 text-gray-300">Cisco IOS Route Entry:</p>
-          <div className="font-mono bg-black text-green-400 p-3 rounded mb-2 border border-gray-700 overflow-x-auto">
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-nowrap">
             ip route {netmask.base} {netmask.mask} [next-hop-ip]
           </div>
         </div>
 
         <div>
           <p className="mb-1 text-gray-300">Router Access Control List:</p>
-          <div className="font-mono bg-black text-green-400 p-3 rounded mb-2 border border-gray-700 overflow-x-auto">
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-nowrap">
             permit ip {netmask.base} {netmask.mask} any
           </div>
         </div>
 
         <div>
           <p className="mb-1 text-gray-300">BGP Route Advertisement:</p>
-          <div className="font-mono bg-black text-green-400 p-3 rounded mb-2 border border-gray-700 overflow-x-auto">
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-nowrap">
             network {netmask.base} mask {netmask.mask}
           </div>
         </div>
 
         <div>
           <p className="mb-1 text-gray-300">OSPF Configuration (Area 0):</p>
-          <div className="font-mono bg-black text-green-400 p-3 rounded mb-2 border border-gray-700 overflow-x-auto whitespace-pre-wrap">
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-pre-wrap text-[9px] xs:text-[10px] sm:text-xs">
             {`interface GigabitEthernet0/0
  ip address ${ip.join(".")} ${netmask.mask}
 !

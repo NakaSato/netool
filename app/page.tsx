@@ -272,20 +272,20 @@ export default function Cidr() {
 
   return (
     // MAIN CONTAINER
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 max-w-[140vw] overflow-hidden">
-      <div className="p-4 sm:p-6 md:p-8 lg:p-10 w-full max-w-[85rem]">
-        <div className="border border-gray-700 rounded-lg shadow-md bg-gray-800 p-5 sm:p-6 md:p-8 lg:p-10">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-900 to-gray-800 text-gray-100 overflow-x-hidden">
+      <div className="p-3 sm:p-4 md:p-6 lg:p-8 w-full max-w-[95rem] mx-auto">
+        <div className="border border-gray-700 rounded-lg shadow-xl bg-gray-800/95 p-4 sm:p-5 md:p-6 lg:p-8 backdrop-blur-sm">
           {/* Terminal-like header */}
-          <div className="mb-5 p-2 bg-gray-900 border border-gray-700 rounded-md flex items-center">
-            <div className="flex space-x-2 mr-4">
-              <div className="w-3 h-3 rounded-full bg-red-500"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-              <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          <div className="mb-4 md:mb-6 p-2 bg-gray-900 border border-gray-700 rounded-md flex items-center">
+            <div className="flex space-x-1.5 sm:space-x-2 mr-2 sm:mr-4">
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500"></div>
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500"></div>
+              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500"></div>
             </div>
-            <div className="font-mono text-sm text-gray-400 flex-grow text-center">
+            <div className="font-mono text-xs sm:text-sm text-gray-400 flex-grow text-center truncate">
               CIDR Calculator - Network Engineering Toolkit
             </div>
-            <div className="px-2 py-0.5 bg-gray-700 rounded text-xs font-mono text-green-400">
+            <div className="px-1.5 sm:px-2 py-0.5 bg-gray-700 rounded text-xs font-mono text-green-400 ml-2 hidden sm:block">
               v1.0.0
             </div>
           </div>
@@ -311,6 +311,9 @@ export default function Cidr() {
             networkSizePercentage={networkSizePercentage}
             handleFieldCopy={handleFieldCopy}
           />
+
+          {/* Create responsive gap between sections */}
+          <div className="my-4 md:my-6"></div>
 
           <SubnetMaskBinary
             netmask={netmask}

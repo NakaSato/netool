@@ -12,11 +12,11 @@ const BinaryTab: React.FC<BinaryTabProps> = ({
   createSubnetBreakdown,
 }) => {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-3">
-      <h5 className="text-sm font-semibold mb-3 text-blue-300 flex items-center">
+    <div className="bg-gray-800 rounded-lg border border-gray-700 p-2 sm:p-3 transition-all hover:border-gray-600">
+      <h5 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-blue-300 flex items-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4 mr-1"
+          className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -29,37 +29,43 @@ const BinaryTab: React.FC<BinaryTabProps> = ({
         Binary Network Analysis
       </h5>
 
-      <div className="text-xs space-y-4">
+      <div className="text-[10px] xs:text-xs space-y-3 sm:space-y-4">
         <div>
-          <div className="flex flex-col space-y-1">
-            <p className="text-gray-300 mb-1">Network Address (Binary):</p>
-            <div className="font-mono bg-black text-gray-300 p-2 rounded border border-gray-700 overflow-x-auto">
+          <div className="flex flex-col space-y-1 sm:space-y-1.5">
+            <p className="text-gray-300 mb-0.5 sm:mb-1">
+              Network Address (Binary):
+            </p>
+            <div className="font-mono bg-black text-gray-300 p-1.5 sm:p-2 rounded border border-gray-700 overflow-x-auto whitespace-nowrap text-[9px] xs:text-[10px] sm:text-xs">
               {netmask.base
                 .split(".")
                 .map((octet) => parseInt(octet).toString(2).padStart(8, "0"))
                 .join(".")}
             </div>
 
-            <p className="text-gray-300 mb-1 mt-2">Subnet Mask (Binary):</p>
-            <div className="font-mono bg-black text-gray-300 p-2 rounded border border-gray-700 overflow-x-auto">
+            <p className="text-gray-300 mb-0.5 sm:mb-1 mt-1.5 sm:mt-2">
+              Subnet Mask (Binary):
+            </p>
+            <div className="font-mono bg-black text-gray-300 p-1.5 sm:p-2 rounded border border-gray-700 overflow-x-auto whitespace-nowrap text-[9px] xs:text-[10px] sm:text-xs">
               {netmask.mask
                 .split(".")
                 .map((octet) => parseInt(octet).toString(2).padStart(8, "0"))
                 .join(".")}
             </div>
 
-            <p className="text-gray-300 mb-1 mt-2">
+            <p className="text-gray-300 mb-0.5 sm:mb-1 mt-1.5 sm:mt-2">
               Broadcast Address (Binary):
             </p>
-            <div className="font-mono bg-black text-gray-300 p-2 rounded border border-gray-700 overflow-x-auto">
+            <div className="font-mono bg-black text-gray-300 p-1.5 sm:p-2 rounded border border-gray-700 overflow-x-auto whitespace-nowrap text-[9px] xs:text-[10px] sm:text-xs">
               {netmask.broadcast
                 .split(".")
                 .map((octet) => parseInt(octet).toString(2).padStart(8, "0"))
                 .join(".")}
             </div>
 
-            <p className="text-gray-300 mb-1 mt-2">Wildcard Mask (Binary):</p>
-            <div className="font-mono bg-black text-gray-300 p-2 rounded border border-gray-700 overflow-x-auto">
+            <p className="text-gray-300 mb-0.5 sm:mb-1 mt-1.5 sm:mt-2">
+              Wildcard Mask (Binary):
+            </p>
+            <div className="font-mono bg-black text-gray-300 p-1.5 sm:p-2 rounded border border-gray-700 overflow-x-auto whitespace-nowrap text-[9px] xs:text-[10px] sm:text-xs">
               {netmask.hostmask
                 .split(".")
                 .map((octet) => parseInt(octet).toString(2).padStart(8, "0"))
@@ -68,8 +74,8 @@ const BinaryTab: React.FC<BinaryTabProps> = ({
           </div>
         </div>
 
-        <div className="mt-4">
-          <p className="text-gray-300 mb-2">Binary Breakdown:</p>
+        <div className="mt-2 sm:mt-3">
+          <p className="text-gray-300 mb-1.5 sm:mb-2">Binary Breakdown:</p>
           {createSubnetBreakdown()}
         </div>
       </div>

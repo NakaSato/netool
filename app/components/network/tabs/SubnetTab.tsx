@@ -17,11 +17,11 @@ interface SubnetTabProps {
 
 const SubnetTab: React.FC<SubnetTabProps> = ({ cidr, subnets }) => {
   return (
-    <div className="bg-gray-800 rounded-lg border border-gray-700 p-3">
-      <h5 className="text-sm font-semibold mb-3 text-blue-300 flex items-center">
+    <div className="bg-gray-800 rounded-lg border border-gray-700 p-2 sm:p-3 transition-all duration-200 hover:border-gray-600">
+      <h5 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-blue-300 flex items-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4 mr-1"
+          className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -30,24 +30,24 @@ const SubnetTab: React.FC<SubnetTabProps> = ({ cidr, subnets }) => {
         Subnet Design Options
       </h5>
 
-      <div className="text-xs">
-        <div className="mb-2">
+      <div className="text-[10px] xs:text-xs">
+        <div className="mb-1.5 sm:mb-2">
           <p className="text-gray-300">Common subnet division options:</p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-xs border-collapse">
+        <div className="overflow-x-auto -mx-2 px-2">
+          <table className="min-w-full text-[10px] xs:text-xs border-collapse">
             <thead>
               <tr className="bg-gray-700">
-                <th className="px-2 py-1 text-left border border-gray-600 text-gray-300">
+                <th className="px-1.5 sm:px-2 py-1 text-left border border-gray-600 text-gray-300">
                   Add Bits
                 </th>
-                <th className="px-2 py-1 text-left border border-gray-600 text-gray-300">
+                <th className="px-1.5 sm:px-2 py-1 text-left border border-gray-600 text-gray-300">
                   New Prefix
                 </th>
-                <th className="px-2 py-1 text-left border border-gray-600 text-gray-300">
+                <th className="px-1.5 sm:px-2 py-1 text-left border border-gray-600 text-gray-300">
                   # of Subnets
                 </th>
-                <th className="px-2 py-1 text-left border border-gray-600 text-gray-300">
+                <th className="px-1.5 sm:px-2 py-1 text-left border border-gray-600 text-gray-300">
                   Hosts per Subnet
                 </th>
               </tr>
@@ -60,16 +60,16 @@ const SubnetTab: React.FC<SubnetTabProps> = ({ cidr, subnets }) => {
                       key={`subnet-option-${bits}`}
                       className="border-b border-gray-700 hover:bg-gray-700"
                     >
-                      <td className="px-2 py-1 border border-gray-600 text-gray-300">
+                      <td className="px-1.5 sm:px-2 py-1 border border-gray-600 text-gray-300">
                         +{bits}
                       </td>
-                      <td className="px-2 py-1 border border-gray-600 text-blue-300 font-mono">
+                      <td className="px-1.5 sm:px-2 py-1 border border-gray-600 text-blue-300 font-mono">
                         /{cidr + bits}
                       </td>
-                      <td className="px-2 py-1 border border-gray-600 text-green-300">
+                      <td className="px-1.5 sm:px-2 py-1 border border-gray-600 text-green-300">
                         {Math.pow(2, bits).toLocaleString()}
                       </td>
-                      <td className="px-2 py-1 border border-gray-600 text-amber-300">
+                      <td className="px-1.5 sm:px-2 py-1 border border-gray-600 text-amber-300">
                         {Math.pow(2, 32 - (cidr + bits)) - 2 > 0
                           ? (
                               Math.pow(2, 32 - (cidr + bits)) - 2
@@ -83,24 +83,24 @@ const SubnetTab: React.FC<SubnetTabProps> = ({ cidr, subnets }) => {
           </table>
         </div>
 
-        {subnets && (
+        {subnets && subnets.length > 0 && (
           <>
-            <h5 className="text-sm font-semibold mt-4 mb-2 text-blue-300">
+            <h5 className="text-xs font-semibold mt-3 sm:mt-4 mb-1.5 sm:mb-2 text-blue-300">
               Sample Subnet Breakdown (first {subnets.length} of{" "}
               {Math.pow(2, 24 - cidr)})
             </h5>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-xs border-collapse">
+            <div className="overflow-x-auto -mx-2 px-2">
+              <table className="min-w-full text-[10px] xs:text-xs border-collapse">
                 <thead>
                   <tr className="bg-gray-700">
-                    <th className="px-2 py-1 text-left border border-gray-600 text-gray-300">
+                    <th className="px-1.5 sm:px-2 py-1 text-left border border-gray-600 text-gray-300">
                       Subnet
                     </th>
-                    <th className="px-2 py-1 text-left border border-gray-600 text-gray-300">
+                    <th className="px-1.5 sm:px-2 py-1 text-left border border-gray-600 text-gray-300">
                       IP Range
                     </th>
-                    <th className="px-2 py-1 text-right border border-gray-600 text-gray-300">
+                    <th className="px-1.5 sm:px-2 py-1 text-right border border-gray-600 text-gray-300">
                       Usable Hosts
                     </th>
                   </tr>
@@ -111,13 +111,19 @@ const SubnetTab: React.FC<SubnetTabProps> = ({ cidr, subnets }) => {
                       key={`subnet-row-${i}`}
                       className="border-b border-gray-700 hover:bg-gray-700"
                     >
-                      <td className="px-2 py-1 border border-gray-600 font-mono text-blue-300">
+                      <td
+                        className="px-1.5 sm:px-2 py-1 border border-gray-600 font-mono text-blue-300 truncate max-w-[100px] sm:max-w-none"
+                        title={subnet.subnet}
+                      >
                         {subnet.subnet}
                       </td>
-                      <td className="px-2 py-1 border border-gray-600 font-mono text-gray-300">
+                      <td
+                        className="px-1.5 sm:px-2 py-1 border border-gray-600 font-mono text-gray-300 truncate max-w-[120px] sm:max-w-none"
+                        title={subnet.range}
+                      >
                         {subnet.range}
                       </td>
-                      <td className="px-2 py-1 text-right border border-gray-600 text-amber-300">
+                      <td className="px-1.5 sm:px-2 py-1 text-right border border-gray-600 text-amber-300">
                         {(subnet.hosts - 2).toLocaleString()}
                       </td>
                     </tr>

@@ -48,14 +48,15 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
   handleFieldCopy,
 }) => {
   return (
-    <>
+    <div className="w-full max-w-full overflow-hidden">
       <div className="relative mb-1">
         <div className="absolute -top-3 left-1/2 h-3 w-px bg-blue-500"></div>
         <div className="absolute -top-3 left-3/4 h-3 w-px bg-blue-500"></div>
         <div className="absolute -top-3 left-[87.5%] h-3 w-px bg-blue-500"></div>
       </div>
 
-      <div className="h-10 sm:h-12 md:h-14 w-full bg-gray-800 rounded-md relative overflow-hidden border border-gray-700">
+      {/* Network visualization bar - improved height responsiveness */}
+      <div className="h-10 sm:h-12 md:h-14 lg:h-16 w-full bg-gray-800 rounded-md relative overflow-hidden border border-gray-700 shadow-sm">
         <div
           className={`h-full ${sizeClass} ${
             cidr <= 8
@@ -75,8 +76,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
             handleFieldCopy(`${netmask.first} - ${netmask.last}`, "IP Range")
           }
         >
-          {networkSizePercentage > 5 && (
-            <span className="absolute inset-0 flex items-center justify-center text-xs text-white font-medium">
+          {networkSizePercentage > 3 && (
+            <span className="absolute inset-0 flex items-center justify-center text-xs sm:text-sm text-white font-medium truncate px-2">
               {netmask.size >= 1000000
                 ? `${(netmask.size / 1000000).toFixed(1)}M IPs`
                 : netmask.size >= 1000
@@ -100,7 +101,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
         ></div>
       </div>
 
-      <div className="flex justify-between text-xs text-gray-400 mt-1 overflow-x-auto pb-1">
+      {/* IP range labels - improved for mobile */}
+      <div className="flex justify-between text-[10px] xs:text-xs text-gray-400 mt-1 overflow-x-auto pb-1">
         <span className="font-mono whitespace-nowrap">0.0.0.0</span>
         <span className="font-mono whitespace-nowrap">128.0.0.0</span>
         <span className="font-mono whitespace-nowrap">192.0.0.0</span>
@@ -108,10 +110,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
         <span className="font-mono whitespace-nowrap">255.255.255.255</span>
       </div>
 
-      <div className="text-xs sm:text-sm mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="p-3 bg-gray-800 rounded border border-gray-700">
-          <div className="flex justify-between items-center mb-1">
-            <h4 className="font-semibold">Network Size</h4>
+      {/* Network info grid - responsive layout improvements */}
+      <div className="text-xs sm:text-sm mt-4 grid grid-cols-1 md:grid-cols-9 gap-3 md:gap-4">
+        <div className="p-2 sm:p-3 md:p-4 bg-gray-800 rounded-lg border border-gray-700 shadow-sm hover:shadow-md transition-shadow md:col-span-5">
+          <div className="flex justify-between items-center mb-1 flex-wrap gap-2">
+            <h4 className="font-semibold text-sm sm:text-base">Network Size</h4>
             <span className="text-xs py-0.5 px-1.5 bg-blue-900 text-blue-200 rounded border border-blue-700">
               {netmask.size >= 1000000
                 ? `${(netmask.size / 1000000).toFixed(1)}M`
@@ -133,8 +136,10 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           {createSubnetBreakdown()}
         </div>
 
-        <div className="p-3 bg-gray-800 rounded border border-gray-700">
-          <h4 className="font-semibold mb-1">Network Class</h4>
+        <div className="p-2 sm:p-3 md:p-4 bg-gray-800 rounded-lg border border-gray-700 shadow-sm hover:shadow-md transition-shadow md:col-span-4">
+          <h4 className="font-semibold mb-1 text-sm sm:text-base">
+            Network Class
+          </h4>
           <p className="text-gray-300">Class {networkClass.class}</p>
           <p className="text-gray-400 text-xs mt-1">
             Traditional range: {networkClass.range}
@@ -144,11 +149,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           </p>
           <div className="mt-2 pt-2 border-t border-gray-600">
             <div className="flex flex-col space-y-2">
-              <div className="flex items-center">
-                <span className="font-medium text-xs text-gray-300 w-24">
+              <div className="flex items-center flex-wrap gap-2">
+                <span className="font-medium text-xs text-gray-300 w-20 sm:w-24">
                   Leading bits:
                 </span>
-                <div className="flex gap-0.5">
+                <div className="flex gap-0.5 flex-wrap">
                   {networkClass.class === "A" ? (
                     <span className="inline-block px-1.5 py-0.5 bg-blue-900 text-blue-200 text-[10px] font-mono rounded border border-blue-700">
                       0
@@ -208,11 +213,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center">
-                <span className="font-medium text-xs text-gray-300 w-24">
+              <div className="flex items-start sm:items-center flex-wrap sm:flex-nowrap">
+                <span className="font-medium text-xs text-gray-300 w-20 sm:w-24 mt-1 sm:mt-0">
                   Usage:
                 </span>
-                <div className="px-2 py-1 bg-gray-700 rounded text-xs text-gray-300 flex-1 border border-gray-600">
+                <div className="px-2 py-1 bg-gray-700 rounded text-xs text-gray-300 w-full border border-gray-600">
                   {networkClass.class === "A" ? (
                     <span className="flex items-center">
                       <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1.5"></span>
@@ -243,7 +248,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
               </div>
             </div>
             <div className="mt-2 p-1.5 bg-yellow-900 border border-yellow-800 rounded-md">
-              <p className="text-[10px] text-yellow-200">
+              <p className="text-[10px] sm:text-xs text-yellow-200">
                 <span className="font-semibold">Note:</span> Modern networking
                 uses CIDR notation (/{cidr}) rather than traditional class-based
                 addressing for more efficient allocation.
@@ -254,7 +259,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
       </div>
 
       {!showAdvancedInfo && (
-        <div className="mt-4 p-2 border border-gray-700 rounded bg-gray-800">
+        <div className="mt-4 p-2 sm:p-3 border border-gray-700 rounded-lg bg-gray-800 shadow-sm">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs gap-2">
             <div>
               <span className="font-medium text-gray-300">Subnet Mask:</span>
@@ -262,9 +267,9 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
                 {netmask.mask}
               </span>
             </div>
-            <div>
+            <div className="w-full sm:w-auto">
               <span className="font-medium text-gray-300">Binary Mask:</span>
-              <span className="ml-2 font-mono text-[10px] sm:text-xs text-blue-300">
+              <span className="ml-2 font-mono text-[9px] xs:text-[10px] sm:text-xs text-blue-300 break-words sm:break-normal">
                 {Array(cidr)
                   .fill("1")
                   .concat(Array(32 - cidr).fill("0"))
@@ -276,7 +281,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
