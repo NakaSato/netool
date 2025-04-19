@@ -45,13 +45,6 @@ export default function Cidr() {
     Array.from({ length: 8 }, (_, i) => (octet >> (7 - i)) & 1)
   );
 
-  const parseOctet = (val: string, max: number) => {
-    const num = Number(val);
-    if (isNaN(num) || num < 0) return 0;
-    if (num > max) return max;
-    return num;
-  };
-
   const setIpOctet = (i: number, val: number) => {
     const newIp = [...ip];
     newIp[i] = val;
@@ -174,11 +167,35 @@ export default function Cidr() {
     setCidr(cidr);
   };
 
-  const handlePaste = (event: React.ClipboardEvent<HTMLInputElement>) => {
-    event.preventDefault();
-    if (event.clipboardData === null) return;
-    const text = event.clipboardData.getData("Text");
-    updateCidrString(text);
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+
+    const clipboardData = e.clipboardData.getData("text");
+    const ipMatch = clipboardData.match(
+      /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(\/(\d{1,2}))?/
+    );
+
+    if (ipMatch) {
+      const [, o1, o2, o3, o4, , cidrVal] = ipMatch;
+
+      // Safely parse and set octets
+      const safeParseOctet = (val: string) =>
+        Math.min(255, Math.max(0, parseInt(val, 10) || 0));
+
+      setIp([
+        safeParseOctet(o1),
+        safeParseOctet(o2),
+        safeParseOctet(o3),
+        safeParseOctet(o4),
+      ]);
+
+      if (cidrVal) {
+        const parsedCidr = parseInt(cidrVal, 10);
+        if (!isNaN(parsedCidr) && parsedCidr >= 0 && parsedCidr <= 32) {
+          setCidr(parsedCidr);
+        }
+      }
+    }
   };
 
   const handleCopy = async () => {
