@@ -40,14 +40,49 @@ export default function InputSection({
   handlePaste,
   bits,
 }: InputSectionProps) {
-  const firstInputRef = useRef<HTMLInputElement>(null);
+  const firstInputRef = useRef<HTMLInputElement | null>(null);
+  // Create refs for all input fields (4 octets + CIDR)
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([
+    null,
+    null,
+    null,
+    null,
+    null,
+  ]);
 
   useEffect(() => {
     // Auto-focus the first input on component mount
     if (firstInputRef.current) {
       firstInputRef.current.focus();
+      // Set the first input ref in our array
+      inputRefs.current[0] = firstInputRef.current;
     }
   }, []);
+
+  // Enhance keyboard navigation
+  const handleInputKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    i: number,
+    max: number
+  ) => {
+    // Handle original up/down navigation
+    handleKeyDown(event, i, max);
+
+    // Handle left/right navigation between inputs
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      const prevIndex = i > 0 ? i - 1 : 4; // Wrap around to CIDR when at first octet
+      inputRefs.current[prevIndex]?.focus();
+    } else if (
+      event.key === "ArrowRight" ||
+      event.key === "." ||
+      event.key === "/"
+    ) {
+      event.preventDefault();
+      const nextIndex = i < 4 ? i + 1 : 0; // Wrap around to first octet when at CIDR
+      inputRefs.current[nextIndex]?.focus();
+    }
+  };
 
   // Define modern network engineering color palette with enhanced hover states
   const inputBgColors = [
@@ -85,7 +120,12 @@ export default function InputSection({
               </span>
               <div className="flex items-center relative group">
                 <input
-                  ref={i === 0 ? firstInputRef : null}
+                  ref={(el) => {
+                    if (i === 0) {
+                      firstInputRef.current = el;
+                    }
+                    inputRefs.current[i] = el;
+                  }}
                   key={`inp-${i}`}
                   type="text"
                   inputMode="numeric"
@@ -100,7 +140,7 @@ export default function InputSection({
                     }
                   }}
                   onWheel={(e) => handleWheel(e, i, 255)}
-                  onKeyDown={(e) => handleKeyDown(e, i, 255)}
+                  onKeyDown={(e) => handleInputKeyDown(e, i, 255)}
                   onPaste={handlePaste}
                   className={`w-9 h-9 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-center rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono ${inputBgColors[i]} text-white border-2 transition-all duration-300 group-hover:border-cyan-500 group-hover:shadow-cyan-900/30 transform group-hover:scale-105`}
                   maxLength={3}
@@ -165,6 +205,9 @@ export default function InputSection({
             </span>
             <div className="flex items-center relative group">
               <input
+                ref={(el) => {
+                  inputRefs.current[4] = el;
+                }}
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
@@ -179,7 +222,7 @@ export default function InputSection({
                   }
                 }}
                 onWheel={(e) => handleWheel(e, 4, 32)}
-                onKeyDown={(e) => handleKeyDown(e, 4, 32)}
+                onKeyDown={(e) => handleInputKeyDown(e, 4, 32)}
                 className={`w-9 h-9 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-center rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono ${inputBgColors[4]} text-white border-2 transition-all duration-300 group-hover:border-cyan-500 group-hover:shadow-cyan-900/30 transform group-hover:scale-105`}
                 maxLength={2}
                 aria-label={`Network bits`}
@@ -275,20 +318,41 @@ export default function InputSection({
                   key={`octet-${i}`}
                   className="px-0.5 sm:px-1 my-0.5 sm:my-1"
                 >
-                  {octet.map((bit, j) => (
-                    <span
-                      key={`octet-${i}-bit-${j}`}
-                      className={`font-mono border border-gray-700 px-0.5 py-0.5 text-[7px] xs:text-[9px] sm:text-xs ${
-                        i * 8 + j < cidr
-                          ? "bg-cyan-900 text-cyan-200 border-cyan-700"
-                          : "bg-gray-900 text-gray-400"
-                      } ${
-                        (j + 1) % 4 === 0 ? "mr-0.5 sm:mr-1" : ""
-                      } transition-colors duration-300 hover:bg-opacity-80`}
-                    >
-                      {bit}
-                    </span>
-                  ))}
+                  {octet.map((bit, j) => {
+                    const bitPosition = i * 8 + j;
+                    const isNetworkBit = bitPosition < cidr;
+
+                    return (
+                      <span
+                        key={`octet-${i}-bit-${j}`}
+                        onClick={() => {
+                          // Toggle bit value (0->1, 1->0) when clicked
+                          const newOctet = [...ip];
+                          const bitValue = 1 << (7 - j);
+                          if (newOctet[i] & bitValue) {
+                            // Bit is 1, turn it off
+                            newOctet[i] &= ~bitValue;
+                          } else {
+                            // Bit is 0, turn it on
+                            newOctet[i] |= bitValue;
+                          }
+                          setIpOctet(i, newOctet[i]);
+                        }}
+                        className={`font-mono border cursor-pointer select-none px-0.5 py-0.5 text-[7px] xs:text-[9px] sm:text-xs ${
+                          isNetworkBit
+                            ? "bg-cyan-900 text-cyan-200 border-cyan-700 hover:bg-cyan-800"
+                            : "bg-gray-900 text-gray-400 hover:bg-gray-800 border-gray-700"
+                        } ${
+                          (j + 1) % 4 === 0 ? "mr-0.5 sm:mr-1" : ""
+                        } transition-colors duration-300`}
+                        title={`Bit ${bitPosition} (${
+                          isNetworkBit ? "Network" : "Host"
+                        } bit): Value ${Math.pow(2, 7 - j)}`}
+                      >
+                        {bit}
+                      </span>
+                    );
+                  })}
                 </span>
               ))}
             </div>
