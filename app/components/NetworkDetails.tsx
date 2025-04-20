@@ -1,27 +1,34 @@
 import React from "react";
 import { getDetailTooltip } from "../utils/tooltips";
 
-interface NetworkDetailsProps {
+export interface NetworkDetailsProps {
   details: Record<string, string>;
   handleFieldCopy: (value: string, fieldName: string) => void;
   copiedField: string;
+  isFromCache?: boolean; // Default to false
 }
 
 export default function NetworkDetails({
   details,
   handleFieldCopy,
   copiedField,
+  isFromCache = false, // Default to false
 }: NetworkDetailsProps) {
   return (
-    <div className="mt-8 mb-4 bg-gray-900 border border-gray-700 rounded-lg shadow-md p-5">
-      <div className="flex items-center mb-4">
-        <div className="w-2 h-5 bg-blue-400 mr-3"></div>
-        <h4 className="font-semibold text-lg text-gray-200 font-mono">
-          NETWORK PARAMETERS
-        </h4>
+    <div className="my-4 sm:my-6 md:my-8 bg-gray-900 rounded-lg shadow-md p-3 sm:p-4 md:p-5 border border-gray-700">
+      <div className="flex items-center mb-3 sm:mb-4">
+        <div className="w-1 h-4 bg-cyan-500 mr-2"></div>
+        <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-200">
+          Network Details
+          {isFromCache && (
+            <span className="ml-2 text-xs text-blue-400 font-normal opacity-80">
+              (cached)
+            </span>
+          )}
+        </h3>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
         {Object.entries(details).map(([label, val]) => (
           <div
             className="p-3 relative group bg-gray-800 hover:bg-gray-750 rounded-lg transition-all duration-300 border border-gray-700 hover:border-cyan-800 shadow-inner"
@@ -60,22 +67,9 @@ export default function NetworkDetails({
                 {label === "Wildcard Mask" && (
                   <span
                     className="text-xs text-gray-500 cursor-help"
-                    title="The wildcard mask is the inverse of the subnet mask (255.255.255.255 - subnet mask). Used in Cisco ACLs and route configurations."
+                    title="Used in Cisco ACLs and routing configurations"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4 inline-block text-blue-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
+                    (ACLs)
                   </span>
                 )}
               </div>

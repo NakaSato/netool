@@ -1,0 +1,47 @@
+{
+  "appTitle": "Calculateur CIDR visuel interactif et plages d'adresses IP",
+  "appSubtitle": "Boîte à outils d'ingénierie réseau",
+  "networkAnalysis": "Analyse réseau",
+  "cached": "en cache",
+  "ipAddressInput": "SAISIE D'ADRESSE IP",
+  "networkClass": {
+    "title": "Classe de réseau",
+    "a": "Classe A (/8 ou moins)",
+    "b": "Classe B (/9-/16)",
+    "c": "Classe C (/17-/24)",
+    "small": "Sous-réseaux (/25-/32)"
+  },
+  "tabs": {
+    "overview": "Aperçu",
+    "subnet": "Sous-réseau",
+    "router": "Routeur",
+    "binary": "Binaire"
+  },
+  "ipDetails": {
+    "netmask": "Masque réseau",
+    "wildcardMask": "Masque générique",
+    "cidrBaseIp": "IP de base CIDR",
+    "broadcastIp": "IP de diffusion",
+    "count": "Nombre",
+    "firstUsableIp": "Première IP utilisable",
+    "lastUsableIp": "Dernière IP utilisable"
+  },
+  "buttons": {
+    "copy": "Copier",
+    "copied": "Copié!",
+    "share": "Partager",
+    "shared": "Partagé!"
+  },
+  "networkType": {
+    "private": "Réseau privé",
+    "public": "Réseau public",
+    "reserved": "Réseau réservé",
+    "special": "Réseau spécial"
+  },
+  "languageSelector": {
+    "language": "Langue",
+    "english": "Anglais",
+    "french": "Français",
+    "chinese": "Chinois"
+  }
+}

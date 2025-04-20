@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-
+import { Toaster } from "react-hot-toast";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -30,6 +30,25 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 1500,
+            style: {
+              borderRadius: "10px",
+              background: "#333",
+              color: "#fff",
+              fontFamily: "var(--font-geist-sans)",
+              padding: "12px 16px",
+            },
+            success: {
+              iconTheme: {
+                primary: "#10B981", // Green color for success icon
+                secondary: "#fff",
+              },
+            },
+          }}
+        />
         {children}
       </body>
     </html>

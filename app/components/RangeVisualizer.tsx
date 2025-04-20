@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Netmask } from "netmask";
+import toast from "react-hot-toast";
 import {
   getNetworkClass,
   getCommonNetworkSize,
@@ -25,7 +26,7 @@ interface Subnet {
   notation: string;
 }
 
-interface RangeVisualizerProps {
+export interface RangeVisualizerProps {
   netmask: Netmask;
   ip: number[];
   cidr: number;
@@ -40,6 +41,7 @@ interface RangeVisualizerProps {
   };
   networkSizePercentage: number;
   handleFieldCopy: (value: string, fieldName: string) => void;
+  isFromCache?: boolean; // Add the new prop
 }
 
 export default function RangeVisualizer({
@@ -49,6 +51,7 @@ export default function RangeVisualizer({
   networkColors,
   networkSizePercentage,
   handleFieldCopy,
+  isFromCache = false, // Default to false
 }: RangeVisualizerProps) {
   const [showAdvancedInfo, setShowAdvancedInfo] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
@@ -375,6 +378,29 @@ export default function RangeVisualizer({
             <div className="w-1.5 xs:w-1.5 sm:w-2 h-3 xs:h-4 sm:h-5 -ml-0.5 xs:-ml-1 sm:-ml-2 bg-gradient-to-r from-blue-700 to-blue-900 shadow-sm border border-blue-700 opacity-90"></div>
             <h3 className="font-bold text-sm xs:text-base sm:text-lg md:text-xl font-mono ml-1.5 xs:ml-2 truncate">
               Network Analysis - {ip.join(".")}/{cidr}
+              {isFromCache && (
+                <span className="ml-2 text-xs xs:text-sm text-blue-400 font-normal opacity-80">
+                  (cached)
+                </span>
+              )}
+              <button
+                onClick={() => {
+                  handleFieldCopy(`${ip.join(".")}/${cidr}`, "Network CIDR");
+                  toast.success("Network CIDR copied to clipboard!");
+                }}
+                className="ml-2 inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors"
+                title="Copy network CIDR"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-3.5 h-3.5 xs:w-4 xs:h-4"
+                >
+                  <path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 013.75 3.75v1.875C13.5 8.161 14.34 9 15.375 9h1.875A3.75 3.75 0 0121 12.75v3.375C21 17.16 20.16 18 19.125 18h-9.75A1.875 1.875 0 017.5 16.125V3.375z" />
+                  <path d="M15 5.25a5.23 5.23 0 00-1.279-3.434 9.768 9.768 0 016.963 6.963A5.23 5.23 0 0017.25 7.5h-1.875A.375.375 0 0115 7.125V5.25zM4.875 6H6v10.125A3.375 3.375 0 009.375 19.5H16.5v1.125c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 013 20.625V7.875C3 6.839 3.84 6 4.875 6z" />
+                </svg>
+              </button>
             </h3>
           </div>
           <div className="flex items-center gap-1.5 xs:gap-2 mt-1.5 xs:mt-0 xs:ml-auto self-end xs:self-auto">

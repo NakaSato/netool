@@ -1,0 +1,47 @@
+{
+  "appTitle": "Interactive visual CIDR and IP range calculator",
+  "appSubtitle": "Network Engineering Toolkit",
+  "networkAnalysis": "Network Analysis",
+  "cached": "cached",
+  "ipAddressInput": "IP ADDRESS INPUT",
+  "networkClass": {
+    "title": "Network Class",
+    "a": "Class A (/8 or less)",
+    "b": "Class B (/9-/16)",
+    "c": "Class C (/17-/24)",
+    "small": "Small Subnets (/25-/32)"
+  },
+  "tabs": {
+    "overview": "Overview",
+    "subnet": "Subnet",
+    "router": "Router",
+    "binary": "Binary"
+  },
+  "ipDetails": {
+    "netmask": "Netmask",
+    "wildcardMask": "Wildcard Mask",
+    "cidrBaseIp": "CIDR Base IP",
+    "broadcastIp": "Broadcast IP",
+    "count": "Count",
+    "firstUsableIp": "First Usable IP",
+    "lastUsableIp": "Last Usable IP"
+  },
+  "buttons": {
+    "copy": "Copy",
+    "copied": "Copied!",
+    "share": "Share",
+    "shared": "Shared!"
+  },
+  "networkType": {
+    "private": "Private Network",
+    "public": "Public Network",
+    "reserved": "Reserved Network",
+    "special": "Special Network"
+  },
+  "languageSelector": {
+    "language": "Language",
+    "english": "English",
+    "french": "French",
+    "chinese": "Chinese"
+  }
+}

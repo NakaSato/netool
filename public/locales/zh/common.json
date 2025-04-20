@@ -1,0 +1,47 @@
+{
+  "appTitle": "交互式视觉CIDR和IP范围计算器",
+  "appSubtitle": "网络工程工具包",
+  "networkAnalysis": "网络分析",
+  "cached": "已缓存",
+  "ipAddressInput": "IP地址输入",
+  "networkClass": {
+    "title": "网络类别",
+    "a": "A类网络 (/8或更少)",
+    "b": "B类网络 (/9-/16)",
+    "c": "C类网络 (/17-/24)",
+    "small": "小型子网 (/25-/32)"
+  },
+  "tabs": {
+    "overview": "概览",
+    "subnet": "子网",
+    "router": "路由器",
+    "binary": "二进制"
+  },
+  "ipDetails": {
+    "netmask": "子网掩码",
+    "wildcardMask": "通配符掩码",
+    "cidrBaseIp": "CIDR基础IP",
+    "broadcastIp": "广播IP",
+    "count": "总数",
+    "firstUsableIp": "第一个可用IP",
+    "lastUsableIp": "最后一个可用IP"
+  },
+  "buttons": {
+    "copy": "复制",
+    "copied": "已复制！",
+    "share": "分享",
+    "shared": "已分享！"
+  },
+  "networkType": {
+    "private": "私有网络",
+    "public": "公共网络",
+    "reserved": "保留网络",
+    "special": "特殊网络"
+  },
+  "languageSelector": {
+    "language": "语言",
+    "english": "英语",
+    "french": "法语",
+    "chinese": "中文"
+  }
+}

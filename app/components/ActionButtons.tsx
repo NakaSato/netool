@@ -14,10 +14,10 @@ export default function ActionButtons({
   isShared,
 }: ActionButtonsProps) {
   return (
-    <div className="flex flex-wrap justify-center sm:justify-end gap-3 md:gap-4 p-3 sm:p-4 md:p-5 mt-3 md:mt-4 border-t border-slate-700">
+    <div className="flex flex-wrap justify-center sm:justify-end gap-3 md:gap-4 p-3 sm:p-4 md:p-5 mt-3 md:mt-4 border-t border-gray-700 bg-gradient-to-b from-gray-800 to-gray-900 rounded-b-lg">
       <button
         onClick={handleCopy}
-        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-medium text-white bg-gradient-to-r from-cyan-700 to-cyan-900 hover:from-cyan-800 hover:to-cyan-950 active:from-cyan-900 active:to-cyan-950 rounded border border-cyan-600 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50"
+        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-medium text-white bg-gradient-to-r from-cyan-700 to-cyan-900 hover:from-cyan-600 hover:to-cyan-800 active:from-cyan-800 active:to-cyan-950 rounded border border-cyan-600 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-opacity-50"
         title="Copy the CIDR notation to clipboard"
       >
         <svg
@@ -56,7 +56,7 @@ export default function ActionButtons({
       </button>
       <button
         onClick={handleShare}
-        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-medium text-white bg-gradient-to-r from-slate-700 to-slate-900 hover:from-slate-800 hover:to-slate-950 active:from-slate-900 active:to-slate-950 rounded border border-slate-600 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-50"
+        className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 text-xs sm:text-sm md:text-base font-medium text-white bg-gradient-to-r from-blue-700 to-indigo-900 hover:from-blue-600 hover:to-indigo-800 active:from-blue-800 active:to-indigo-950 rounded border border-blue-600 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
         title="Copy a shareable URL with the current CIDR notation"
       >
         <svg
@@ -93,6 +93,24 @@ export default function ActionButtons({
           <span className="font-mono tracking-wide">Copy Share Link</span>
         )}
       </button>
+
+      <div className="w-full sm:w-auto mt-3 sm:mt-0 text-xs text-gray-400 flex items-center justify-center sm:justify-start font-mono bg-gray-800/50 px-2 py-1 rounded border border-gray-700 shadow-inner">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-3 w-3 mr-1 text-cyan-400"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+        Click to copy to clipboard
+      </div>
     </div>
   );
 }

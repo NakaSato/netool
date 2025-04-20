@@ -9,8 +9,12 @@ interface BinaryTabProps {
 
 const BinaryTab: React.FC<BinaryTabProps> = ({
   netmask,
+  cidr,
   createSubnetBreakdown,
 }) => {
+  // Use the cidr from props if provided, otherwise extract it from netmask
+  const networkBits = cidr !== undefined ? cidr : netmask.bitmask;
+
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 p-2 sm:p-3 transition-all hover:border-gray-600">
       <h5 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-blue-300 flex items-center">
@@ -32,44 +36,134 @@ const BinaryTab: React.FC<BinaryTabProps> = ({
       <div className="text-[10px] xs:text-xs space-y-3 sm:space-y-4">
         <div>
           <div className="flex flex-col space-y-1 sm:space-y-1.5">
-            <p className="text-gray-300 mb-0.5 sm:mb-1">
+            <p className="text-gray-300 mb-0.5 sm:mb-1 flex items-center">
               Network Address (Binary):
+              <span className="ml-auto text-cyan-400 text-[8px] xs:text-[9px] bg-cyan-900/50 px-1.5 py-0.5 rounded-full border border-cyan-700/50">
+                /{networkBits}
+              </span>
             </p>
             <div className="font-mono bg-black text-gray-300 p-1.5 sm:p-2 rounded border border-gray-700 overflow-x-auto whitespace-nowrap text-[9px] xs:text-[10px] sm:text-xs">
-              {netmask.base
-                .split(".")
-                .map((octet) => parseInt(octet).toString(2).padStart(8, "0"))
-                .join(".")}
+              {netmask.base.split(".").map((octet, index) => {
+                const binaryOctet = parseInt(octet)
+                  .toString(2)
+                  .padStart(8, "0");
+                return (
+                  <span key={index}>
+                    {index > 0 && "."}
+                    {binaryOctet.split("").map((bit, bitIndex) => {
+                      const absoluteBitPosition = index * 8 + bitIndex;
+                      return (
+                        <span
+                          key={bitIndex}
+                          className={
+                            absoluteBitPosition < networkBits
+                              ? "text-cyan-400 font-bold"
+                              : ""
+                          }
+                        >
+                          {bit}
+                        </span>
+                      );
+                    })}
+                  </span>
+                );
+              })}
             </div>
 
-            <p className="text-gray-300 mb-0.5 sm:mb-1 mt-1.5 sm:mt-2">
+            <p className="text-gray-300 mb-0.5 sm:mb-1 mt-1.5 sm:mt-2 flex items-center">
               Subnet Mask (Binary):
+              <span className="ml-auto text-cyan-400 text-[8px] xs:text-[9px] bg-cyan-900/50 px-1.5 py-0.5 rounded-full border border-cyan-700/50">
+                {networkBits} bits
+              </span>
             </p>
             <div className="font-mono bg-black text-gray-300 p-1.5 sm:p-2 rounded border border-gray-700 overflow-x-auto whitespace-nowrap text-[9px] xs:text-[10px] sm:text-xs">
-              {netmask.mask
-                .split(".")
-                .map((octet) => parseInt(octet).toString(2).padStart(8, "0"))
-                .join(".")}
+              {netmask.mask.split(".").map((octet, index) => {
+                const binaryOctet = parseInt(octet)
+                  .toString(2)
+                  .padStart(8, "0");
+                return (
+                  <span key={index}>
+                    {index > 0 && "."}
+                    {binaryOctet.split("").map((bit, bitIndex) => {
+                      const absoluteBitPosition = index * 8 + bitIndex;
+                      return (
+                        <span
+                          key={bitIndex}
+                          className={
+                            absoluteBitPosition < networkBits
+                              ? "text-cyan-400 font-bold"
+                              : ""
+                          }
+                        >
+                          {bit}
+                        </span>
+                      );
+                    })}
+                  </span>
+                );
+              })}
             </div>
 
             <p className="text-gray-300 mb-0.5 sm:mb-1 mt-1.5 sm:mt-2">
               Broadcast Address (Binary):
             </p>
             <div className="font-mono bg-black text-gray-300 p-1.5 sm:p-2 rounded border border-gray-700 overflow-x-auto whitespace-nowrap text-[9px] xs:text-[10px] sm:text-xs">
-              {netmask.broadcast
-                .split(".")
-                .map((octet) => parseInt(octet).toString(2).padStart(8, "0"))
-                .join(".")}
+              {netmask.broadcast.split(".").map((octet, index) => {
+                const binaryOctet = parseInt(octet)
+                  .toString(2)
+                  .padStart(8, "0");
+                return (
+                  <span key={index}>
+                    {index > 0 && "."}
+                    {binaryOctet.split("").map((bit, bitIndex) => {
+                      const absoluteBitPosition = index * 8 + bitIndex;
+                      return (
+                        <span
+                          key={bitIndex}
+                          className={
+                            absoluteBitPosition < networkBits
+                              ? "text-cyan-400 font-bold"
+                              : "text-amber-400"
+                          }
+                        >
+                          {bit}
+                        </span>
+                      );
+                    })}
+                  </span>
+                );
+              })}
             </div>
 
             <p className="text-gray-300 mb-0.5 sm:mb-1 mt-1.5 sm:mt-2">
               Wildcard Mask (Binary):
             </p>
             <div className="font-mono bg-black text-gray-300 p-1.5 sm:p-2 rounded border border-gray-700 overflow-x-auto whitespace-nowrap text-[9px] xs:text-[10px] sm:text-xs">
-              {netmask.hostmask
-                .split(".")
-                .map((octet) => parseInt(octet).toString(2).padStart(8, "0"))
-                .join(".")}
+              {netmask.hostmask.split(".").map((octet, index) => {
+                const binaryOctet = parseInt(octet)
+                  .toString(2)
+                  .padStart(8, "0");
+                return (
+                  <span key={index}>
+                    {index > 0 && "."}
+                    {binaryOctet.split("").map((bit, bitIndex) => {
+                      const absoluteBitPosition = index * 8 + bitIndex;
+                      return (
+                        <span
+                          key={bitIndex}
+                          className={
+                            absoluteBitPosition < networkBits
+                              ? "text-gray-700"
+                              : "text-amber-400 font-bold"
+                          }
+                        >
+                          {bit}
+                        </span>
+                      );
+                    })}
+                  </span>
+                );
+              })}
             </div>
           </div>
         </div>

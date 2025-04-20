@@ -7,6 +7,30 @@ interface RouterTabProps {
 }
 
 const RouterTab: React.FC<RouterTabProps> = ({ ip, netmask }) => {
+  // Helper function to convert IP array to string
+  const _ipString = ip.join(".");
+  // Calculate gateway (usually first usable IP in the subnet)
+  const baseIpParts = netmask.base.split(".");
+  const gatewayIp = [
+    ...baseIpParts.slice(0, 3),
+    (parseInt(baseIpParts[3]) + 1).toString(),
+  ].join(".");
+  // Calculate wildcard mask (inverse of netmask)
+  const wildcardMask = netmask.mask
+    .split(".")
+    .map((octet) => (255 - parseInt(octet)).toString())
+    .join(".");
+  // Calculate DHCP range (second usable to last usable - 1)
+  const dhcpStart = [
+    ...baseIpParts.slice(0, 3),
+    (parseInt(baseIpParts[3]) + 2).toString(),
+  ].join(".");
+  const lastIpParts = netmask.broadcast.split(".");
+  const dhcpEnd = [
+    ...lastIpParts.slice(0, 3),
+    (parseInt(lastIpParts[3]) - 1).toString(),
+  ].join(".");
+
   return (
     <div className="bg-gray-800 rounded-lg border border-gray-700 p-2 sm:p-3 transition-all hover:border-gray-600">
       <h5 className="text-xs sm:text-sm font-semibold mb-2 sm:mb-3 text-blue-300 flex items-center">
@@ -22,10 +46,35 @@ const RouterTab: React.FC<RouterTabProps> = ({ ip, netmask }) => {
             clipRule="evenodd"
           />
         </svg>
-        Router Configuration Examples
+        Router Configuration
       </h5>
 
       <div className="text-[10px] xs:text-xs space-y-3 sm:space-y-4">
+        {/* Basic LAN Setup */}
+        <div>
+          <p className="mb-1 text-gray-300">Basic LAN Setup:</p>
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-pre-wrap text-[9px] xs:text-[10px] sm:text-xs">
+            {`# Router LAN Interface Configuration
+interface LAN
+ip address ${gatewayIp} ${netmask.mask}
+description Local Area Network
+no shutdown`}
+          </div>
+        </div>
+
+        {/* DHCP Server Configuration */}
+        <div>
+          <p className="mb-1 text-gray-300">DHCP Server Configuration:</p>
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-pre-wrap text-[9px] xs:text-[10px] sm:text-xs">
+            {`ip dhcp pool LAN_POOL
+network ${netmask.base} ${netmask.mask}
+default-router ${gatewayIp}
+dns-server 8.8.8.8 8.8.4.4
+lease 7`}
+          </div>
+        </div>
+
+        {/* Cisco IOS Route Entry */}
         <div>
           <p className="mb-1 text-gray-300">Cisco IOS Route Entry:</p>
           <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-nowrap">
@@ -33,28 +82,51 @@ const RouterTab: React.FC<RouterTabProps> = ({ ip, netmask }) => {
           </div>
         </div>
 
+        {/* Router Access Control List */}
         <div>
-          <p className="mb-1 text-gray-300">Router Access Control List:</p>
-          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-nowrap">
-            permit ip {netmask.base} {netmask.mask} any
+          <p className="mb-1 text-gray-300">Access Control List:</p>
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-pre-wrap text-[9px] xs:text-[10px] sm:text-xs">
+            {`access-list 10 permit ${netmask.base} ${wildcardMask}
+!
+interface LAN
+ ip access-group 10 in`}
           </div>
         </div>
 
-        <div>
-          <p className="mb-1 text-gray-300">BGP Route Advertisement:</p>
-          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-nowrap">
-            network {netmask.base} mask {netmask.mask}
-          </div>
-        </div>
-
+        {/* OSPF Configuration */}
         <div>
           <p className="mb-1 text-gray-300">OSPF Configuration (Area 0):</p>
           <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-pre-wrap text-[9px] xs:text-[10px] sm:text-xs">
-            {`interface GigabitEthernet0/0
- ip address ${ip.join(".")} ${netmask.mask}
+            {`interface LAN
+ip address ${ip.join(".")} ${netmask.mask}
 !
 router ospf 1
- network ${netmask.base} ${netmask.hostmask} area 0`}
+network ${netmask.base} ${wildcardMask} area 0`}
+          </div>
+        </div>
+
+        {/* Port Forwarding Example */}
+        <div>
+          <p className="mb-1 text-gray-300">Port Forwarding Example:</p>
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-pre-wrap text-[9px] xs:text-[10px] sm:text-xs">
+            {`ip nat inside source static tcp ${dhcpStart} 80 interface WAN 80
+ip nat inside source static tcp ${dhcpStart} 443 interface WAN 443`}
+          </div>
+        </div>
+
+        {/* VPN Configuration Example */}
+        <div>
+          <p className="mb-1 text-gray-300">VPN Configuration Example:</p>
+          <div className="font-mono bg-black text-green-400 p-1.5 sm:p-2 md:p-3 rounded mb-1 sm:mb-2 border border-gray-700 overflow-x-auto whitespace-pre-wrap text-[9px] xs:text-[10px] sm:text-xs">
+            {`crypto isakmp policy 10
+encr aes 256
+authentication pre-share
+group 2
+!
+ip local pool VPN_POOL ${dhcpStart} ${dhcpEnd}
+!
+ip access-list extended VPN_TRAFFIC
+permit ip ${netmask.base} ${wildcardMask} any`}
           </div>
         </div>
       </div>

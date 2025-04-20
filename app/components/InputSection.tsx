@@ -1,4 +1,4 @@
-/* eslint-disable react/no-unescaped-entities, react-hooks/exhaustive-deps */
+/* eslint-disable react/no-unescaped-entities, react-hooks/exhaustive-deps, @typescript-eslint/no-unused-expressions */
 import React, { useRef, useEffect, Dispatch, SetStateAction } from "react";
 import { getOctetTooltip } from "../utils/tooltips";
 
@@ -40,8 +40,6 @@ export default function InputSection({
   handlePaste,
   bits,
 }: InputSectionProps) {
-  const firstInputRef = useRef<HTMLInputElement | null>(null);
-  // Create refs for all input fields (4 octets + CIDR)
   const inputRefs = useRef<Array<HTMLInputElement | null>>([
     null,
     null,
@@ -52,79 +50,119 @@ export default function InputSection({
 
   useEffect(() => {
     // Auto-focus the first input on component mount
-    if (firstInputRef.current) {
-      firstInputRef.current.focus();
-      // Set the first input ref in our array
-      inputRefs.current[0] = firstInputRef.current;
+    if (inputRefs.current[0]) {
+      inputRefs.current[0].focus();
     }
   }, []);
 
-  // Enhance keyboard navigation
-  const handleInputKeyDown = (
+  // Enhanced keyboard navigation handler
+  const handleEnhancedKeyDown = (
     event: React.KeyboardEvent<HTMLInputElement>,
     i: number,
     max: number
   ) => {
-    // Handle original up/down navigation
+    // Call the original handler for basic functionality
     handleKeyDown(event, i, max);
 
-    // Handle left/right navigation between inputs
-    if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      const prevIndex = i > 0 ? i - 1 : 4; // Wrap around to CIDR when at first octet
-      inputRefs.current[prevIndex]?.focus();
-    } else if (
-      event.key === "ArrowRight" ||
-      event.key === "." ||
-      event.key === "/"
-    ) {
-      event.preventDefault();
-      const nextIndex = i < 4 ? i + 1 : 0; // Wrap around to first octet when at CIDR
-      inputRefs.current[nextIndex]?.focus();
+    // Additional keyboard shortcuts
+    const value = i < 4 ? ip[i] : cidr;
+
+    switch (event.key) {
+      case "ArrowUp":
+        // Increase value (with bounds check)
+        if (value < max) {
+          i < 4 ? setIpOctet(i, value + 1) : setCidr(value + 1);
+        }
+        event.preventDefault();
+        break;
+      case "ArrowDown":
+        // Decrease value (with bounds check)
+        if (value > 0) {
+          i < 4 ? setIpOctet(i, value - 1) : setCidr(value - 1);
+        }
+        event.preventDefault();
+        break;
+      case "ArrowLeft":
+        // Navigate to previous octet
+        if (i > 0) {
+          const prevInput = inputRefs.current[i - 1];
+          if (prevInput) {
+            prevInput.focus();
+            event.preventDefault();
+          }
+        }
+        break;
+      case "ArrowRight":
+        // Navigate to next octet
+        if (i < 4) {
+          const nextInput = inputRefs.current[i + 1];
+          if (nextInput) {
+            nextInput.focus();
+            event.preventDefault();
+          }
+        }
+        break;
+      case ".":
+        // Navigate to next octet on dot key
+        if (i < 3) {
+          const nextInput = inputRefs.current[i + 1];
+          if (nextInput) {
+            nextInput.focus();
+            event.preventDefault();
+          }
+        }
+        break;
+      case "/":
+        // Navigate to CIDR input on slash key
+        if (i < 4) {
+          const cidrInput = inputRefs.current[4];
+          if (cidrInput) {
+            cidrInput.focus();
+            event.preventDefault();
+          }
+        }
+        break;
     }
   };
 
-  // Define modern network engineering color palette with enhanced hover states
+  // Define modern network engineering color palette
   const inputBgColors = [
-    "bg-cyan-900 border-cyan-600 hover:bg-cyan-800", // First octet
-    "bg-blue-900 border-blue-600 hover:bg-blue-800", // Second octet
-    "bg-indigo-900 border-indigo-600 hover:bg-indigo-800", // Third octet
-    "bg-violet-900 border-violet-600 hover:bg-violet-800", // Fourth octet
-    "bg-slate-800 border-slate-600 hover:bg-slate-700", // CIDR
+    "bg-cyan-900 border-cyan-600", // First octet
+    "bg-blue-900 border-blue-600", // Second octet
+    "bg-indigo-900 border-indigo-600", // Third octet
+    "bg-violet-900 border-violet-600", // Fourth octet
+    "bg-slate-800 border-slate-600", // CIDR
   ];
 
   return (
-    <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12 relative">
-      {/* Technical background pattern with improved opacity */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-5 pointer-events-none"></div>
+    <div className="mb-8 relative">
+      {/* Technical background pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
 
-      {/* Main container with enhanced terminal-like border and responsive padding */}
-      <div className="relative p-2.5 xs:p-3 sm:p-4 md:p-5 lg:p-6 border-2 border-cyan-500/30 rounded-lg bg-gray-900/30 backdrop-blur-sm shadow-[0_0_15px_rgba(0,200,255,0.15)] transition-all duration-300">
-        {/* Header with network status - improved spacing */}
-        <div className="flex items-center mb-2 xs:mb-3 sm:mb-4 md:mb-5">
-          <div className="w-1.5 h-3 xs:w-2 xs:h-4 sm:h-5 bg-green-400 mr-2 rounded-sm"></div>
-          <h3 className="text-gray-300 font-mono text-[10px] xs:text-xs sm:text-sm md:text-base">
-            IP ADDRESS INPUT
-          </h3>
-          <div className="ml-auto px-1.5 xs:px-2 py-0.5 bg-gray-800 rounded text-[10px] xs:text-xs font-mono text-green-500 border border-gray-700">
+      {/* Main container with terminal-like border */}
+      <div className="relative p-4 border-2 border-cyan-500/30 rounded-lg bg-gray-900/30 backdrop-blur-sm shadow-[0_0_15px_rgba(0,200,255,0.15)]">
+        {/* Header with network status */}
+        <div className="flex items-center mb-4">
+          <div className="w-2 h-5 bg-green-400 mr-2"></div>
+          <h3 className="text-gray-300 font-mono text-sm">IP ADDRESS INPUT</h3>
+          <div className="ml-auto px-2 py-0.5 bg-gray-800 rounded text-xs font-mono text-green-500">
             IPv4
           </div>
         </div>
 
-        {/* IP Input section with improved responsive gap */}
-        <div className="flex flex-wrap justify-center gap-1.5 xs:gap-2 sm:gap-3 md:gap-4 lg:gap-5 py-2 xs:py-3 sm:py-4 md:py-5">
+        {/* IP Input section */}
+        <div className="flex flex-wrap justify-center gap-1 xs:gap-2 sm:gap-3 md:gap-4 py-4 sm:py-5">
           {ip.map((octet, i) => (
             <div key={`octet-${i}`} className="flex flex-col items-center">
-              <span className="text-[8px] xs:text-[10px] sm:text-xs font-mono text-gray-400 mb-1">
-                {`Octet ${i + 1}`}
-              </span>
+              <span className="text-xs font-mono text-gray-400 mb-1">{`Octet ${
+                i + 1
+              }`}</span>
               <div className="flex items-center relative group">
                 <input
                   ref={(el) => {
-                    if (i === 0) {
-                      firstInputRef.current = el;
+                    if (el) {
+                      inputRefs.current[i] = el;
                     }
-                    inputRefs.current[i] = el;
                   }}
                   key={`inp-${i}`}
                   type="text"
@@ -140,23 +178,22 @@ export default function InputSection({
                     }
                   }}
                   onWheel={(e) => handleWheel(e, i, 255)}
-                  onKeyDown={(e) => handleInputKeyDown(e, i, 255)}
+                  onKeyDown={(e) => handleEnhancedKeyDown(e, i, 255)}
                   onPaste={handlePaste}
-                  className={`w-9 h-9 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-center rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono ${inputBgColors[i]} text-white border-2 transition-all duration-300 group-hover:border-cyan-500 group-hover:shadow-cyan-900/30 transform group-hover:scale-105`}
+                  className={`w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 text-lg xs:text-xl sm:text-2xl text-center rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono ${inputBgColors[i]} text-white border-2 transition-all duration-200 group-hover:border-cyan-500`}
                   maxLength={3}
                   aria-label={`Octet ${i + 1}`}
                   title={getOctetTooltip(i)}
                 />
-                {/* Up/Down arrows with improved hover effects */}
-                <div className="absolute right-0 top-0 bottom-0 w-3 xs:w-4 sm:w-5 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {/* Up/Down arrows */}
+                <div className="absolute right-0 top-0 bottom-0 w-5 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    className="flex-1 text-gray-300 hover:text-white hover:bg-gray-700/80 flex items-center justify-center rounded-tr-md transition-colors duration-150"
+                    className="flex-1 text-gray-300 hover:text-white hover:bg-gray-700 flex items-center justify-center rounded-tr-md"
                     onClick={() => octet < 255 && setIpOctet(i, octet + 1)}
-                    aria-label="Increment value"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-1.5 w-1.5 xs:h-2 xs:w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3"
+                      className="h-3 w-3"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -170,13 +207,12 @@ export default function InputSection({
                     </svg>
                   </button>
                   <button
-                    className="flex-1 text-gray-300 hover:text-white hover:bg-gray-700/80 flex items-center justify-center rounded-br-md transition-colors duration-150"
+                    className="flex-1 text-gray-300 hover:text-white hover:bg-gray-700 flex items-center justify-center rounded-br-md"
                     onClick={() => octet > 0 && setIpOctet(i, octet - 1)}
-                    aria-label="Decrement value"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-1.5 w-1.5 xs:h-2 xs:w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3"
+                      className="h-3 w-3"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -191,7 +227,7 @@ export default function InputSection({
                   </button>
                 </div>
                 <span
-                  className="text-base xs:text-lg sm:text-xl md:text-2xl lg:text-3xl mx-0.5 xs:mx-1 sm:mx-1.5 text-cyan-500 font-mono animate-pulse"
+                  className="text-xl xs:text-2xl sm:text-3xl mx-0.5 xs:mx-1 sm:mx-1.5 text-cyan-500"
                   key={`sep-${i}`}
                 >
                   {i == 3 ? "/" : "."}
@@ -200,13 +236,13 @@ export default function InputSection({
             </div>
           ))}
           <div className="flex flex-col items-center">
-            <span className="text-[8px] xs:text-[10px] sm:text-xs font-mono text-gray-400 mb-1">
-              Prefix
-            </span>
+            <span className="text-xs font-mono text-gray-400 mb-1">Prefix</span>
             <div className="flex items-center relative group">
               <input
                 ref={(el) => {
-                  inputRefs.current[4] = el;
+                  if (el) {
+                    inputRefs.current[4] = el;
+                  }
                 }}
                 type="text"
                 inputMode="numeric"
@@ -222,22 +258,21 @@ export default function InputSection({
                   }
                 }}
                 onWheel={(e) => handleWheel(e, 4, 32)}
-                onKeyDown={(e) => handleInputKeyDown(e, 4, 32)}
-                className={`w-9 h-9 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl text-center rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono ${inputBgColors[4]} text-white border-2 transition-all duration-300 group-hover:border-cyan-500 group-hover:shadow-cyan-900/30 transform group-hover:scale-105`}
+                onKeyDown={(e) => handleEnhancedKeyDown(e, 4, 32)}
+                className={`w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 text-lg xs:text-xl sm:text-2xl text-center rounded-md shadow-md focus:outline-none focus:ring-2 focus:ring-cyan-400 font-mono ${inputBgColors[4]} text-white border-2 transition-all duration-200 group-hover:border-cyan-500`}
                 maxLength={2}
                 aria-label={`Network bits`}
                 title={`CIDR Prefix: Number of network bits (1-32). /${cidr} means ${cidr} bits are for the network portion.`}
               />
               {/* Up/Down arrows */}
-              <div className="absolute right-0 top-0 bottom-0 w-3 xs:w-4 sm:w-5 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="absolute right-0 top-0 bottom-0 w-5 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  className="flex-1 text-gray-300 hover:text-white hover:bg-gray-700/80 flex items-center justify-center rounded-tr-md transition-colors duration-150"
+                  className="flex-1 text-gray-300 hover:text-white hover:bg-gray-700 flex items-center justify-center rounded-tr-md"
                   onClick={() => cidr < 32 && setCidr(cidr + 1)}
-                  aria-label="Increment CIDR"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-1.5 w-1.5 xs:h-2 xs:w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3"
+                    className="h-3 w-3"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -251,13 +286,12 @@ export default function InputSection({
                   </svg>
                 </button>
                 <button
-                  className="flex-1 text-gray-300 hover:text-white hover:bg-gray-700/80 flex items-center justify-center rounded-br-md transition-colors duration-150"
+                  className="flex-1 text-gray-300 hover:text-white hover:bg-gray-700 flex items-center justify-center rounded-br-md"
                   onClick={() => cidr > 0 && setCidr(cidr - 1)}
-                  aria-label="Decrement CIDR"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-1.5 w-1.5 xs:h-2 xs:w-2 sm:h-2.5 sm:w-2.5 md:h-3 md:w-3"
+                    className="h-3 w-3"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -275,89 +309,63 @@ export default function InputSection({
           </div>
         </div>
 
-        {/* Enhanced keyboard navigation hints with platform awareness and improved responsiveness */}
-        <div className="text-center text-[8px] xs:text-[10px] sm:text-xs text-gray-400 mt-2 sm:mt-3 mb-2 bg-gray-800/80 p-1.5 xs:p-2 sm:p-2.5 rounded border border-gray-700 font-mono">
+        {/* Enhanced keyboard navigation hints with platform awareness */}
+        <div className="text-center text-xs text-gray-400 mt-3 mb-2 bg-gray-800 p-2 rounded border border-gray-700 font-mono">
           <p>
             <span className="text-cyan-400">Keyboard:</span> Use{" "}
-            <kbd className="px-0.5 xs:px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600 text-[7px] xs:text-[9px] sm:text-xs">
+            <kbd className="px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600">
               ↑
             </kbd>
             /
-            <kbd className="px-0.5 xs:px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600 text-[7px] xs:text-[9px] sm:text-xs">
+            <kbd className="px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600">
               ↓
             </kbd>{" "}
             to change values,{" "}
-            <kbd className="px-0.5 xs:px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600 text-[7px] xs:text-[9px] sm:text-xs">
+            <kbd className="px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600">
               ←
             </kbd>
             /
-            <kbd className="px-0.5 xs:px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600 text-[7px] xs:text-[9px] sm:text-xs">
+            <kbd className="px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600">
               →
             </kbd>{" "}
             to navigate,{" "}
-            <kbd className="px-0.5 xs:px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600 text-[7px] xs:text-[9px] sm:text-xs">
+            <kbd className="px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600">
               .
             </kbd>
             /{" "}
-            <kbd className="px-0.5 xs:px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600 text-[7px] xs:text-[9px] sm:text-xs">
+            <kbd className="px-1 py-0.5 bg-gray-700 rounded text-cyan-300 border border-gray-600">
               /
             </kbd>{" "}
             for next octet/CIDR
           </p>
         </div>
 
-        {/* Binary representation with improved visualization and responsiveness */}
-        <div className="overflow-x-auto mx-auto max-w-full scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-900 pb-2 mt-2 xs:mt-3 sm:mt-4 bg-gray-800/80 p-1.5 xs:p-2 sm:p-3 rounded-md border border-gray-700 shadow-inner">
+        {/* Binary representation with improved visualization */}
+        <div className="overflow-x-auto mx-auto max-w-full scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-900 pb-2 mt-4 bg-gray-800 p-3 rounded-md border border-gray-700">
           <div className="flex flex-col">
-            <div className="text-[8px] xs:text-[10px] sm:text-xs font-mono text-gray-400 mb-1 sm:mb-2">
+            <div className="text-xs font-mono text-gray-400 mb-2">
               Binary Representation:
             </div>
             <div className="flex flex-nowrap justify-center min-w-max">
               {bits.map((octet, i) => (
-                <span
-                  key={`octet-${i}`}
-                  className="px-0.5 sm:px-1 my-0.5 sm:my-1"
-                >
-                  {octet.map((bit, j) => {
-                    const bitPosition = i * 8 + j;
-                    const isNetworkBit = bitPosition < cidr;
-
-                    return (
-                      <span
-                        key={`octet-${i}-bit-${j}`}
-                        onClick={() => {
-                          // Toggle bit value (0->1, 1->0) when clicked
-                          const newOctet = [...ip];
-                          const bitValue = 1 << (7 - j);
-                          if (newOctet[i] & bitValue) {
-                            // Bit is 1, turn it off
-                            newOctet[i] &= ~bitValue;
-                          } else {
-                            // Bit is 0, turn it on
-                            newOctet[i] |= bitValue;
-                          }
-                          setIpOctet(i, newOctet[i]);
-                        }}
-                        className={`font-mono border cursor-pointer select-none px-0.5 py-0.5 text-[7px] xs:text-[9px] sm:text-xs ${
-                          isNetworkBit
-                            ? "bg-cyan-900 text-cyan-200 border-cyan-700 hover:bg-cyan-800"
-                            : "bg-gray-900 text-gray-400 hover:bg-gray-800 border-gray-700"
-                        } ${
-                          (j + 1) % 4 === 0 ? "mr-0.5 sm:mr-1" : ""
-                        } transition-colors duration-300`}
-                        title={`Bit ${bitPosition} (${
-                          isNetworkBit ? "Network" : "Host"
-                        } bit): Value ${Math.pow(2, 7 - j)}`}
-                      >
-                        {bit}
-                      </span>
-                    );
-                  })}
+                <span key={`octet-${i}`} className="px-0.5 sm:px-1 my-1">
+                  {octet.map((bit, j) => (
+                    <span
+                      key={`octet-${i}-bit-${j}`}
+                      className={`font-mono border border-gray-700 px-0.5 sm:px-1 py-0.5 text-xs ${
+                        i * 8 + j < cidr
+                          ? "bg-cyan-900 text-cyan-200"
+                          : "bg-gray-900 text-gray-400"
+                      } ${(j + 1) % 4 === 0 ? "mr-1" : ""}`}
+                    >
+                      {bit}
+                    </span>
+                  ))}
                 </span>
               ))}
             </div>
-            <div className="flex flex-nowrap mt-0.5 xs:mt-1 sm:mt-2 w-full">
-              <div className="flex justify-between w-full max-w-full px-1 md:px-1.5 lg:px-2 text-[0.5rem] xs:text-[0.55rem] sm:text-[0.6rem] md:text-xs lg:text-sm text-gray-500 font-mono">
+            <div className="flex flex-nowrap mt-2 w-full">
+              <div className="flex justify-between w-full px-1 text-[0.6rem] sm:text-xs text-gray-500 font-mono">
                 <span>0</span>
                 <span>8</span>
                 <span>16</span>

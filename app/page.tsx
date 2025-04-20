@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Netmask } from "netmask";
 import InputSection from "./components/InputSection";
 import RangeVisualizer from "./components/RangeVisualizer";
@@ -10,6 +10,12 @@ import NetworkDetails from "./components/NetworkDetails";
 import ActionButtons from "./components/ActionButtons";
 import CidrExplanation from "./components/CidrExplanation";
 import Footer from "./components/Footer";
+import {
+  generateCacheKey,
+  getCacheValue,
+  setCacheValue,
+} from "./utils/cacheUtils";
+import toast from "react-hot-toast";
 
 // Tailwind CSS grid columns utility for 32 columns
 const gridCols32Style = `
@@ -17,6 +23,25 @@ const gridCols32Style = `
     grid-template-columns: repeat(32, minmax(0, 1fr));
   }
 `;
+
+// Define a type for Netmask to avoid using 'any'
+interface NetmaskType {
+  base: string;
+  mask: string;
+  broadcast: string;
+  size: number;
+  first: string;
+  last: string;
+  contains: (ip: string) => boolean;
+  forEach: (cb: (ip: string, long: number, index: number) => void) => void;
+  next: (count?: number) => NetmaskType;
+  toString: () => string;
+  // Add missing properties required by RangeVisualizer
+  bitmask: number;
+  hostmask: string; // Changed from number to string to match actual type
+  maskLong: number;
+  netLong: number;
+}
 
 export default function Cidr() {
   const [ip, setIp] = useState([192, 168, 1, 0]);
@@ -40,167 +65,203 @@ export default function Cidr() {
   const [isCopied, setIsCopied] = useState(false);
   const [isShared, setIsShared] = useState(false);
   const [copiedField, setCopiedField] = useState("");
+  const [isFromCache, setIsFromCache] = useState(false);
 
   const bits = ip.map((octet) =>
     Array.from({ length: 8 }, (_, i) => (octet >> (7 - i)) & 1)
   );
 
-  const setIpOctet = (i: number, val: number) => {
-    const newIp = [...ip];
-    newIp[i] = val;
-    setIp(newIp);
-  };
+  const setIpOctet = useCallback(
+    (i: number, val: number) => {
+      const newIp = [...ip];
+      newIp[i] = val;
+      setIp(newIp);
+      setIsFromCache(false); // Reset cache state when input changes
+    },
+    [ip]
+  );
 
-  const handleWheel = (
-    event: React.WheelEvent<HTMLInputElement>,
-    i: number,
-    max: number
-  ) => {
-    event.preventDefault();
-    const min = 0;
-    const target = event.currentTarget as HTMLInputElement;
-    let value = parseInt(target.value);
+  // Wrap handleSetCidr in useCallback to fix the dependency warning
+  const handleSetCidr = useCallback((value: React.SetStateAction<number>) => {
+    setCidr(value);
+    setIsFromCache(false);
+  }, []);
 
-    if (event.deltaY > 0 && value > min) {
-      value -= 1;
-    }
-    if (event.deltaY < 0 && value < max) {
-      value += 1;
-    }
-
-    if (i == 4) {
-      setCidr(value);
-    } else {
-      setIpOctet(i, value);
-    }
-  };
-
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>,
-    i: number,
-    max: number
-  ) => {
-    const min = 0;
-    const target = event.currentTarget as HTMLInputElement;
-    let value = parseInt(target.value);
-
-    // Navigation and value adjustment with arrow keys
-    if (event.key === "ArrowDown" && value > min) {
-      value -= 1;
-    } else if (event.key === "ArrowUp" && value < max) {
-      value += 1;
-    } else if (event.key === "ArrowRight") {
+  const handleWheel = useCallback(
+    (event: React.WheelEvent<HTMLInputElement>, i: number, max: number) => {
       event.preventDefault();
-      const parent = (event.target as Node).parentNode;
-      const next = parent?.nextSibling?.firstChild;
-      if (next instanceof HTMLInputElement) {
-        next.select();
-        next.focus();
+      const min = 0;
+      const target = event.currentTarget as HTMLInputElement;
+      let value = parseInt(target.value);
+
+      if (event.deltaY > 0 && value > min) {
+        value -= 1;
       }
-    } else if (event.key === "ArrowLeft") {
-      event.preventDefault();
-      const parent = (event.target as Node).parentNode;
-      const prev = parent?.previousSibling?.firstChild;
-      if (prev instanceof HTMLInputElement) {
-        prev.select();
-        prev.focus();
+      if (event.deltaY < 0 && value < max) {
+        value += 1;
       }
-    } else if (event.key === ".") {
-      event.preventDefault();
-      const parent = (event.target as Node).parentNode;
-      const next = parent?.nextSibling?.firstChild;
-      if (next instanceof HTMLInputElement) {
-        next.select();
-        next.focus();
+
+      if (i == 4) {
+        handleSetCidr(value);
+      } else {
+        setIpOctet(i, value);
       }
-    } else if (event.key === "/") {
-      event.preventDefault();
-      // Find the CIDR input field regardless of where the user currently is
-      const inputs = document.querySelectorAll('input[type="text"]');
-      const cidrInput = inputs[inputs.length - 1] as HTMLInputElement;
-      if (cidrInput) {
-        cidrInput.select();
-        cidrInput.focus();
-      }
-    }
-    // Shortcuts for copy operations
-    else if (
-      (event.ctrlKey || event.metaKey) &&
-      event.key.toLowerCase() === "c"
-    ) {
-      event.preventDefault();
-      handleCopy();
-    } else if (
-      (event.ctrlKey || event.metaKey) &&
-      event.key.toLowerCase() === "s"
-    ) {
-      event.preventDefault();
-      handleShare();
-    }
+    },
+    [handleSetCidr, setIpOctet]
+  );
 
-    if (i == 4) {
-      setCidr(value);
-    } else {
-      setIpOctet(i, value);
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>, i: number, max: number) => {
+      const min = 0;
+      const target = event.currentTarget as HTMLInputElement;
+      let value = parseInt(target.value);
 
-  const updateCidrString = (val: string) => {
-    const parts = val.split("/");
-    const ip = parts[0].split(".").map(Number);
-    const cidr = Number(parts[1]);
-
-    if (ip.length != 4) {
-      return;
-    }
-
-    ip.forEach((octet) => {
-      if (Number.isNaN(octet) || octet < 0 || octet > 255) {
-        return;
-      }
-    });
-    setIp(ip);
-
-    if (Number.isNaN(cidr) || cidr < 0 || cidr > 32) {
-      return;
-    }
-    setCidr(cidr);
-  };
-
-  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-    e.preventDefault();
-
-    const clipboardData = e.clipboardData.getData("text");
-    const ipMatch = clipboardData.match(
-      /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(\/(\d{1,2}))?/
-    );
-
-    if (ipMatch) {
-      const [, o1, o2, o3, o4, , cidrVal] = ipMatch;
-
-      // Safely parse and set octets
-      const safeParseOctet = (val: string) =>
-        Math.min(255, Math.max(0, parseInt(val, 10) || 0));
-
-      setIp([
-        safeParseOctet(o1),
-        safeParseOctet(o2),
-        safeParseOctet(o3),
-        safeParseOctet(o4),
-      ]);
-
-      if (cidrVal) {
-        const parsedCidr = parseInt(cidrVal, 10);
-        if (!isNaN(parsedCidr) && parsedCidr >= 0 && parsedCidr <= 32) {
-          setCidr(parsedCidr);
+      // Navigation and value adjustment with arrow keys
+      if (event.key === "ArrowDown" && value > min) {
+        value -= 1;
+      } else if (event.key === "ArrowUp" && value < max) {
+        value += 1;
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        const parent = (event.target as Node).parentNode;
+        const next = parent?.nextSibling?.firstChild;
+        if (next instanceof HTMLInputElement) {
+          next.select();
+          next.focus();
+        }
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        const parent = (event.target as Node).parentNode;
+        const prev = parent?.previousSibling?.firstChild;
+        if (prev instanceof HTMLInputElement) {
+          prev.select();
+          prev.focus();
+        }
+      } else if (event.key === ".") {
+        event.preventDefault();
+        const parent = (event.target as Node).parentNode;
+        const next = parent?.nextSibling?.firstChild;
+        if (next instanceof HTMLInputElement) {
+          next.select();
+          next.focus();
+        }
+      } else if (event.key === "/") {
+        event.preventDefault();
+        // Find the CIDR input field regardless of where the user currently is
+        const inputs = document.querySelectorAll('input[type="text"]');
+        const cidrInput = inputs[inputs.length - 1] as HTMLInputElement;
+        if (cidrInput) {
+          cidrInput.select();
+          cidrInput.focus();
         }
       }
-    }
-  };
+      // Shortcuts for copy operations
+      else if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === "c"
+      ) {
+        event.preventDefault();
+        handleCopy();
+      } else if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === "s"
+      ) {
+        event.preventDefault();
+        handleShare();
+      }
+
+      if (i == 4) {
+        handleSetCidr(value);
+      } else {
+        setIpOctet(i, value);
+      }
+    },
+    [handleSetCidr, setIpOctet]
+  );
+
+  const updateCidrString = useCallback(
+    (val: string) => {
+      const parts = val.split("/");
+      const ip = parts[0].split(".").map(Number);
+      const cidr = Number(parts[1]);
+
+      if (ip.length != 4) {
+        return;
+      }
+
+      ip.forEach((octet) => {
+        if (Number.isNaN(octet) || octet < 0 || octet > 255) {
+          return;
+        }
+      });
+      setIp(ip);
+
+      if (Number.isNaN(cidr) || cidr < 0 || cidr > 32) {
+        return;
+      }
+      handleSetCidr(cidr);
+    },
+    [handleSetCidr]
+  );
+
+  const handlePaste = useCallback(
+    (e: React.ClipboardEvent<HTMLInputElement>) => {
+      e.preventDefault();
+
+      const clipboardData = e.clipboardData.getData("text");
+      const ipMatch = clipboardData.match(
+        /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})(\/(\d{1,2}))?/
+      );
+
+      if (ipMatch) {
+        const [, o1, o2, o3, o4, , cidrVal] = ipMatch;
+
+        // Safely parse and set octets
+        const safeParseOctet = (val: string) =>
+          Math.min(255, Math.max(0, parseInt(val, 10) || 0));
+
+        setIp([
+          safeParseOctet(o1),
+          safeParseOctet(o2),
+          safeParseOctet(o3),
+          safeParseOctet(o4),
+        ]);
+
+        if (cidrVal) {
+          const parsedCidr = parseInt(cidrVal, 10);
+          if (!isNaN(parsedCidr) && parsedCidr >= 0 && parsedCidr <= 32) {
+            handleSetCidr(parsedCidr);
+          }
+        }
+      }
+      setIsFromCache(false); // Reset cache state on paste
+    },
+    [handleSetCidr]
+  );
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(pretty);
     setIsCopied(true);
+    toast.success(
+      <div className="flex items-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mr-2"
+        >
+          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+        <span>Network address copied to clipboard</span>
+      </div>
+    );
     setTimeout(() => setIsCopied(false), 2000);
   };
 
@@ -209,12 +270,52 @@ export default function Cidr() {
     window.location.hash = frag;
     await navigator.clipboard.writeText(window.location.toString());
     setIsShared(true);
+    toast.success(
+      <div className="flex items-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mr-2"
+        >
+          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+        <span>Link copied to clipboard</span>
+      </div>
+    );
     setTimeout(() => setIsShared(false), 2000);
   };
 
   const handleFieldCopy = async (value: string, fieldName: string) => {
     await navigator.clipboard.writeText(value);
     setCopiedField(fieldName);
+    toast.success(
+      <div className="flex items-center">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="mr-2"
+        >
+          <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+          <path d="m9 12 2 2 4-4" />
+        </svg>
+        <span>{fieldName} copied to clipboard</span>
+      </div>
+    );
     setTimeout(() => setCopiedField(""), 2000);
   };
 
@@ -223,7 +324,7 @@ export default function Cidr() {
     if (fragment) {
       updateCidrString(fragment);
     }
-  }, []);
+  }, [updateCidrString]);
 
   // Add useEffect to inject the CSS for grid-cols-32 since it's not in default Tailwind
   useEffect(() => {
@@ -245,7 +346,26 @@ export default function Cidr() {
   }, []);
 
   const pretty = ip.join(".") + "/" + cidr;
-  const netmask = new Netmask(pretty);
+
+  // Try to get the netmask from cache first
+  const cacheKey = generateCacheKey(ip, cidr);
+  let netmask: NetmaskType;
+  let cacheHit = false;
+
+  const cachedNetmask = getCacheValue(cacheKey);
+  if (cachedNetmask) {
+    netmask = cachedNetmask as NetmaskType;
+    cacheHit = true;
+  } else {
+    netmask = new Netmask(pretty) as NetmaskType;
+    // Store result in cache for future use
+    setCacheValue(cacheKey, netmask);
+  }
+
+  // Update cache status indicator
+  useEffect(() => {
+    setIsFromCache(cacheHit);
+  }, [cacheHit]);
 
   // Calculate Wildcard mask (inverse of Subnet mask)
   const calculateWildcardMask = (subnetMask: string): string => {
@@ -285,8 +405,15 @@ export default function Cidr() {
             <div className="font-mono text-xs sm:text-sm text-gray-400 flex-grow text-center truncate">
               CIDR Calculator - Network Engineering Toolkit
             </div>
-            <div className="px-1.5 sm:px-2 py-0.5 bg-gray-700 rounded text-xs font-mono text-green-400 ml-2 hidden sm:block">
-              v1.0.0
+            <div className="flex items-center">
+              {isFromCache && (
+                <div className="px-1.5 sm:px-2 py-0.5 mr-2 bg-blue-900/80 rounded text-xs font-mono text-blue-300 border border-blue-700 animate-pulse">
+                  cached
+                </div>
+              )}
+              <div className="px-1.5 sm:px-2 py-0.5 bg-gray-700 rounded text-xs font-mono text-green-400 ml-2 hidden sm:block">
+                v1.0.0
+              </div>
             </div>
           </div>
 
@@ -295,7 +422,7 @@ export default function Cidr() {
             ip={ip}
             cidr={cidr}
             setIpOctet={setIpOctet}
-            setCidr={setCidr}
+            setCidr={handleSetCidr}
             networkColors={networkColors}
             handleWheel={handleWheel}
             handleKeyDown={handleKeyDown}
@@ -310,6 +437,7 @@ export default function Cidr() {
             networkColors={networkColors}
             networkSizePercentage={networkSizePercentage}
             handleFieldCopy={handleFieldCopy}
+            isFromCache={isFromCache}
           />
 
           {/* Create responsive gap between sections */}
@@ -321,12 +449,17 @@ export default function Cidr() {
             wildcardMask={wildcardMask}
           />
 
-          <SubnetDivision cidr={cidr} setCidr={setCidr} netmask={netmask} />
+          <SubnetDivision
+            cidr={cidr}
+            setCidr={handleSetCidr}
+            netmask={netmask}
+          />
 
           <NetworkDetails
             details={details}
             handleFieldCopy={handleFieldCopy}
             copiedField={copiedField}
+            isFromCache={isFromCache}
           />
 
           <ActionButtons

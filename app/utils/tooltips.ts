@@ -18,7 +18,7 @@ export const getDetailTooltip = (label: string) => {
     case "Last Usable IP":
       return "Last IP address that can be assigned to a host on this network.";
     default:
-      return "";
+      return ""; // Add default return value
   }
 };
 

@@ -235,50 +235,25 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
                     </span>
                   ) : networkClass.class === "D" ? (
                     <span className="flex items-center">
-                      <span className="inline-block w-2 h-2 bg-purple-500 rounded-full mr-1.5"></span>
-                      Multicast groups
+                      <span className="inline-block w-2 h-2 bg-amber-500 rounded-full mr-1.5"></span>
+                      Multicast
                     </span>
                   ) : (
                     <span className="flex items-center">
                       <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-1.5"></span>
-                      Reserved for future use
+                      Reserved addresses
                     </span>
                   )}
                 </div>
               </div>
-            </div>
-            <div className="mt-2 p-1.5 bg-yellow-900 border border-yellow-800 rounded-md">
-              <p className="text-[10px] sm:text-xs text-yellow-200">
-                <span className="font-semibold">Note:</span> Modern networking
-                uses CIDR notation (/{cidr}) rather than traditional class-based
-                addressing for more efficient allocation.
-              </p>
             </div>
           </div>
         </div>
       </div>
 
       {!showAdvancedInfo && (
-        <div className="mt-4 p-2 sm:p-3 border border-gray-700 rounded-lg bg-gray-800 shadow-sm">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-xs gap-2">
-            <div>
-              <span className="font-medium text-gray-300">Subnet Mask:</span>
-              <span className="ml-2 font-mono text-blue-300">
-                {netmask.mask}
-              </span>
-            </div>
-            <div className="w-full sm:w-auto">
-              <span className="font-medium text-gray-300">Binary Mask:</span>
-              <span className="ml-2 font-mono text-[9px] xs:text-[10px] sm:text-xs text-blue-300 break-words sm:break-normal">
-                {Array(cidr)
-                  .fill("1")
-                  .concat(Array(32 - cidr).fill("0"))
-                  .join("")
-                  .match(/.{1,8}/g)
-                  ?.join(".")}
-              </span>
-            </div>
-          </div>
+        <div className="mt-4 text-xs text-gray-500 text-center">
+          Click "Show Advanced" above for more network details
         </div>
       )}
     </div>
