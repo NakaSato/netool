@@ -2,8 +2,6 @@
 
 **Web-based CIDR / netmask / IP address visualizer - https://cidr.xyz**
 
-[![cidr.png](cidr.png)](https://cidr.xyz)
-
 ## Dev
 
 Install dependencies and run the development server:
