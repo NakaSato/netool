@@ -7,19 +7,19 @@ export default function Footer() {
         <div className="flex items-center mb-2 sm:mb-0">
           <div className="w-1.5 h-4 bg-cyan-500 mr-2"></div>
           <p className="font-mono text-sm">
-            Created by{" "}
+            Modify by{" "}
             <a
               href="https://yuv.al"
               className="text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
             >
-              Yuval Adam
+              NakaSato
             </a>
           </p>
         </div>
 
         <div className="flex items-center gap-4">
           <a
-            href="https://github.com/yuvadm/cidr.xyz"
+            href="https://github.com/NakaSato/netool"
             className="text-gray-400 hover:text-cyan-400 transition-colors flex items-center"
             aria-label="GitHub repository"
           >
