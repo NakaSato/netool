@@ -1,6 +1,6 @@
 # cidr.xyz
 
-**Web-based CIDR / netmask / IP address visualizer - https://cidr.xyz**
+**Web-based CIDR / netmask / IP address visualizer
 
 ## Dev
 
