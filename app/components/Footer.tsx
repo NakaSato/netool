@@ -9,7 +9,7 @@ export default function Footer() {
           <p className="font-mono text-sm">
             Modify by{" "}
             <a
-              href="https://yuv.al"
+              href="/"
               className="text-cyan-400 hover:text-cyan-300 hover:underline transition-colors"
             >
               NakaSato
